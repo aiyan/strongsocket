@@ -1,0 +1,16 @@
+{
+  "name": "strongsocket",
+  "version": "0.0.0",
+  "private": false,
+  "description": "",
+  "main": "src/index.js",
+  "scripts": {
+    "format": "prettier --write \"**/*.{js,ts,json,md}\""
+  },
+  "keywords": [],
+  "author": "Aiyan Jiang",
+  "license": "MIT",
+  "devDependencies": {
+    "prettier": "^2.0.5"
+  }
+}

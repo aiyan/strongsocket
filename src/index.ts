@@ -18,6 +18,8 @@ export type Options = {
   reconnection?: boolean;
   reconnectionDelay?: number;
   reconnectionAttempts?: number;
+  reconnectionDelayMax?: number;
+  randomizationFactor?: number;
   messageQueueSize?: number;
 };
 
@@ -25,6 +27,8 @@ const DEFAULT = {
   reconnection: true,
   reconnectionDelay: 1000,
   reconnectionAttempts: Infinity,
+  reconnectionDelayMax: 5000,
+  randomizationFactor: 0.5,
   messageQueueSize: Infinity,
 };
 
@@ -198,7 +202,7 @@ class StrongSocket {
     if (this._ws && this._ws.readyState === StrongSocket.OPEN) {
       this._ws.send(data);
     } else {
-      const {messageQueueSize = DEFAULT.messageQueueSize} = this._options;
+      const { messageQueueSize = DEFAULT.messageQueueSize } = this._options;
       if (this._messageQueue.length < messageQueueSize) {
         this._messageQueue.push(data);
       }
@@ -235,7 +239,6 @@ class StrongSocket {
 
   private _reconnect(code?: number, reason?: string) {
     this._closeCalled = false;
-    this._retryCount = 0;
     if (!this._ws || this._ws.readyState === StrongSocket.CLOSED) {
       this._connect();
     } else {
@@ -250,8 +253,16 @@ class StrongSocket {
       return 0;
     }
 
-    const {reconnectionDelay = DEFAULT.reconnectionDelay} = this._options;
-    return reconnectionDelay;
+    const {
+      reconnectionDelay = DEFAULT.reconnectionDelay,
+      reconnectionDelayMax = DEFAULT.reconnectionDelayMax,
+      randomizationFactor = DEFAULT.randomizationFactor,
+    } = this._options;
+
+    const currentDelay = Math.min(this._retryCount * reconnectionDelay, reconnectionDelayMax);
+    const randomization = (2 * Math.random() - 1) * currentDelay * randomizationFactor;
+
+    return Math.max(currentDelay + randomization, 0);
   }
 
   private _wait(): Promise<void> {

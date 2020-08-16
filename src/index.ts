@@ -259,8 +259,12 @@ class StrongSocket {
       randomizationFactor = DEFAULT.randomizationFactor,
     } = this._options;
 
-    const currentDelay = Math.min(this._retryCount * reconnectionDelay, reconnectionDelayMax);
-    const randomization = (2 * Math.random() - 1) * currentDelay * randomizationFactor;
+    const currentDelay = Math.min(
+      this._retryCount * reconnectionDelay,
+      reconnectionDelayMax,
+    );
+    const randomization =
+      (2 * Math.random() - 1) * currentDelay * randomizationFactor;
 
     return Math.max(currentDelay + randomization, 0);
   }

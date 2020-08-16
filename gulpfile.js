@@ -9,9 +9,7 @@ const clean = () => {
 };
 
 const build = () => {
-  return tsProject.src()
-    .pipe(tsProject())
-    .pipe(gulp.dest('dist'));
+  return tsProject.src().pipe(tsProject()).pipe(gulp.dest('dist'));
 };
 
 exports.default = gulp.series(clean, build);

@@ -1,16 +1,24 @@
-import { EventListenerMap } from './events';
-
 type WebSocketData = string | ArrayBuffer | Blob | ArrayBufferView;
 
-type Options = {
-  reconnection?: boolean;
-  reconnectionDelay?: number;
-  reconnectionAttempts?: number;
-  messageQueueSize?: number;
+type EventListenerMap = {
+  open: (ev: Event) => any;
+  close: (ev: CloseEvent) => any;
+  error: (ev: Event) => any;
+  message: (ev: MessageEvent) => any;
 };
 
 type ListenerMap = {
   [type in keyof EventListenerMap]: EventListenerMap[type][];
+};
+
+/**
+ * Options that can be specified to StrongSocket.
+ */
+export type Options = {
+  reconnection?: boolean;
+  reconnectionDelay?: number;
+  reconnectionAttempts?: number;
+  messageQueueSize?: number;
 };
 
 const DEFAULT = {
@@ -20,6 +28,13 @@ const DEFAULT = {
   messageQueueSize: Infinity,
 };
 
+/**
+ * StrongSocket is a robust decorator for JavaScript WebSockets with automatic
+ * reconnection, message buffering, and more.
+ *
+ * It replicates the JavaScript WebSocket API and provides an additional layer
+ * of functionality.
+ */
 class StrongSocket {
   private _ws?: WebSocket;
 
@@ -33,10 +48,11 @@ class StrongSocket {
     error: [],
     message: [],
   };
-  public onopen: EventListenerMap['open'] | null = null;
-  public onclose: EventListenerMap['close'] | null = null;
-  public onerror: EventListenerMap['error'] | null = null;
-  public onmessage: EventListenerMap['message'] | null = null;
+
+  onopen: EventListenerMap['open'] | null = null;
+  onclose: EventListenerMap['close'] | null = null;
+  onerror: EventListenerMap['error'] | null = null;
+  onmessage: EventListenerMap['message'] | null = null;
 
   private _retryCount = 0;
   private _connectLock = false;
@@ -60,15 +76,15 @@ class StrongSocket {
   }
 
   get extensions() {
-    return this._ws?.extensions;
+    return this._ws ? this._ws.extensions : '';
   }
 
   get protocol() {
-    return this._ws?.protocol;
+    return this._ws ? this._ws.protocol : '';
   }
 
   get readyState() {
-    return this._ws?.readyState;
+    return this._ws ? this._ws.readyState : '';
   }
 
   get binaryType() {
@@ -128,6 +144,10 @@ class StrongSocket {
     return StrongSocket.CLOSED;
   }
 
+  /**
+   * Appends an event listener for events whose type attribute value is type. The callback argument sets the callback
+   * that will be invoked when the event is dispatched.
+   */
   addEventListener<T extends keyof EventListenerMap>(
     type: T,
     listener: EventListenerMap[T],
@@ -138,6 +158,9 @@ class StrongSocket {
     }
   }
 
+  /**
+   * Removes the event listener in target's event listener list with the same type, callback, and options.
+   */
   removeEventListener<T extends keyof EventListenerMap>(
     type: T,
     listener: EventListenerMap[T],
@@ -159,16 +182,23 @@ class StrongSocket {
     return true;
   }
 
+  /**
+   * Closes the WebSocket connection, optionally using code as the the WebSocket connection close code and reason as the
+   * WebSocket connection close reason.
+   */
   close(code = 1000, reason?: string) {
     this._closeCalled = true;
     this._ws?.close(code, reason);
   }
 
+  /**
+   * Transmits data using the WebSocket connection. data can be a string, a Blob, an ArrayBuffer, or an ArrayBufferView.
+   */
   send(data: WebSocketData) {
     if (this._ws && this._ws.readyState === StrongSocket.OPEN) {
       this._ws.send(data);
     } else {
-      const { messageQueueSize = DEFAULT.messageQueueSize } = this._options;
+      const {messageQueueSize = DEFAULT.messageQueueSize} = this._options;
       if (this._messageQueue.length < messageQueueSize) {
         this._messageQueue.push(data);
       }
@@ -220,7 +250,7 @@ class StrongSocket {
       return 0;
     }
 
-    const { reconnectionDelay = DEFAULT.reconnectionDelay } = this._options;
+    const {reconnectionDelay = DEFAULT.reconnectionDelay} = this._options;
     return reconnectionDelay;
   }
 

@@ -1,16 +1,31 @@
 {
   "name": "strongsocket",
-  "version": "0.0.0",
-  "private": false,
-  "description": "",
-  "main": "src/index.js",
-  "scripts": {
-    "format": "prettier --write \"**/*.{js,ts,json,md}\""
-  },
-  "keywords": [],
+  "version": "0.1.0",
+  "description": "A robust decorator for JavaScript WebSockets with automatic reconnection, message buffering, and more",
   "author": "Aiyan Jiang",
   "license": "MIT",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "websocket",
+    "reconnect",
+    "strong"
+  ],
+  "homepage": "https://github.com/aiyan/strongsocket#readme",
+  "repository": "github:aiyan/strongsocket",
+  "scripts": {
+    "prepublishOnly": "npm run build",
+    "build": "gulp",
+    "format": "prettier --write \"**/*.{js,ts,json,md}\""
+  },
+  "dependencies": {},
   "devDependencies": {
+    "del": "^5.1.0",
+    "gulp": "^4.0.2",
+    "gulp-typescript": "^6.0.0-alpha.1",
     "prettier": "^2.0.5",
     "typescript": "^3.9.7"
   }

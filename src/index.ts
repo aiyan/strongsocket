@@ -230,7 +230,11 @@ class StrongSocket {
       if (this._closeCalled) {
         return;
       }
-      this._ws = new WebSocket(this._url, this._protocols);
+      if (this._protocols) {
+        this._ws = new WebSocket(this._url, this._protocols);
+      } else {
+        this._ws = new WebSocket(this._url);
+      }
       this._ws.binaryType = this._binaryType;
       this._connectLock = false;
       this._addOwnListeners();
